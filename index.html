@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Beads - M.A. Gohar</title>
+    <style>
+        :root {
+            --app-bg: #030a16;
+            --card-bg: radial-gradient(circle, #0a192f 0%, #02060c 100%);
+            --gold-glow: #f3ba2f;
+            --bead-color: #ffd700;
+            --text-gray: #94a3b8;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; background-color: var(--app-bg);
+            font-family: 'Segoe UI', sans-serif; color: white;
+            user-select: none; overflow: hidden;
+        }
+
+        .phone-frame {
+            background: var(--card-bg);
+            width: 340px; padding: 25px 15px 45px;
+            border-radius: 50px; text-align: center;
+            position: relative; border: 3px solid #1e293b; 
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.15), inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Branding Section */
+        .branding-header { margin-bottom: 15px; }
+        .app-title { font-size: 1.3rem; color: #fff; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .urdu-title { font-size: 1.4rem; color: var(--gold-glow); display: block; margin: 5px 0; }
+        .dev-name { font-size: 0.8rem; color: #fff; opacity: 0.7; letter-spacing: 1px; }
+
+        .top-container { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; margin-bottom: 20px; }
+        .side-btn { 
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 8px 12px; border-radius: 12px; font-size: 0.7rem; cursor: pointer;
+        }
+
+        /* Stats & Level */
+        .level-badge { color: var(--gold-glow); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; display: block; }
+        .header-stats { display: flex; justify-content: space-between; padding: 0 20px; font-size: 0.9rem; color: var(--text-gray); }
+        .mute-btn { margin-top: 5px; cursor: pointer; color: var(--gold-glow); font-size: 0.8rem; }
+
+        /* Real Mala Container */
+        .ring-container {
+            position: relative; width: 220px; height: 220px; margin: 20px auto;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .mala-beads-wrap {
+            position: absolute; width: 100%; height: 100%;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .bead {
+            position: absolute; width: 14px; height: 14px;
+            background: radial-gradient(circle at 30% 30%, #fff, var(--bead-color));
+            border-radius: 50%; box-shadow: 0 0 5px rgba(255, 215, 0, 0.6);
+            left: 50%; top: 0; transform-origin: 50% 110px;
+        }
+
+        .total-display { font-size: 4rem; font-weight: 100; margin: 0; z-index: 10; color: #fff; }
+        .percent-display { position: absolute; bottom: 40px; font-size: 1rem; color: var(--gold-glow); font-weight: bold; }
+
+        /* Press Button */
+        .dhikr-btn {
+            width: 140px; height: 140px;
+            border-radius: 50%; border: none;
+            background: radial-gradient(circle at 35% 35%, #fcd34d 0%, #b28924 100%);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.8);
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+            margin: 10px auto 0; transition: 0.1s; outline: none;
+        }
+        .dhikr-btn:active { transform: scale(0.9); }
+        .dhikr-btn span { font-size: 1.2rem; color: #4a3700; font-weight: 900; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <div class="top-container">
+            <button class="side-btn" onclick="reset()">RESET</button>
+            <button class="side-btn" onclick="setGoal()">TARGET</button>
+        </div>
+
+        <div class="branding-header">
+            <span class="app-title">DIVINE BEADS</span>
+            <span class="urdu-title">پاک تسبیح</span>
+            <span class="dev-name">Powered by M.A. Gohar</span>
+        </div>
+
+        <span class="level-badge" id="levelText">Level: Beginner</span>
+
+        <div class="header-stats">
+            <div>Today: <b id="todayCount" style="color:#fff">0</b><br>
+                 <div class="mute-btn" id="soundBtn" onclick="toggleSound()">🔊 Sound On</div>
+            </div>
+            <div>Target: <b id="targetLabel" style="color:#fff">100</b></div>
+        </div>
+
+        <div class="ring-container">
+            <div class="mala-beads-wrap" id="malaWrap">
+                </div>
+            <h1 class="total-display" id="mainCounter">0</h1>
+            <div class="percent-display" id="percentText">0%</div>
+        </div>
+
+        <button class="dhikr-btn" id="tapBtn">
+            <span>PRESS</span>
+        </button>
+    </div>
+
+    <script>
+        let count = parseInt(localStorage.getItem('mag_count')) || 0;
+        let goal = parseInt(localStorage.getItem('mag_goal')) || 100;
+        let isMuted = localStorage.getItem('mag_mute') === 'true';
+
+        const malaWrap = document.getElementById('malaWrap');
+        const mainDisplay = document.getElementById('mainCounter');
+        const percentText = document.getElementById('percentText');
+        const todayDisplay = document.getElementById('todayCount');
+        const targetLabel = document.getElementById('targetLabel');
+        const soundBtn = document.getElementById('soundBtn');
+        const levelText = document.getElementById('levelText');
+
+        // Generate 33 beads for the mala
+        for (let i = 0; i < 33; i++) {
+            const bead = document.createElement('div');
+            bead.className = 'bead';
+            bead.style.transform = `translateX(-50%) rotate(${i * (360 / 33)}deg)`;
+            malaWrap.appendChild(bead);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            localStorage.setItem('mag_mute', isMuted);
+            soundBtn.innerText = isMuted ? '🔇 Muted' : '🔊 Sound On';
+        }
+
+        function playTargetSound() {
+            if (isMuted) return;
+            const freqs = [2500, 3000, 3500];
+            freqs.forEach((f, i) => {
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.connect(g); g.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(f, audioCtx.currentTime + (i * 0.2));
+                g.gain.setValueAtTime(0.1, audioCtx.currentTime + (i * 0.2));
+                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (i * 0.2) + 0.8);
+                osc.start(audioCtx.currentTime + (i * 0.2));
+                osc.stop(audioCtx.currentTime + (i * 0.2) + 0.8);
+            });
+        }
+
+        function updateUI() {
+            mainDisplay.innerText = count;
+            todayDisplay.innerText = count;
+            targetLabel.innerText = goal;
+            
+            // Mala Rotation Logic
+            const rotation = count * (360 / 33);
+            malaWrap.style.transform = `rotate(-${rotation}deg)`;
+
+            // Percentage & Progress
+            let progress = Math.min((count / goal) * 100, 100);
+            percentText.innerText = Math.floor(progress) + "%";
+
+            // Color Change for beads based on progress
+            const beads = document.querySelectorAll('.bead');
+            beads.forEach((b, idx) => {
+                if (count % 33 > idx) {
+                    b.style.filter = "hue-rotate(150deg) brightness(1.5)"; // Becomes Cyan/Blue
+                } else {
+                    b.style.filter = "none";
+                }
+            });
+
+            // Level Logic
+            if(count > 1000) levelText.innerText = "Level: Master";
+            else if(count > 500) levelText.innerText = "Level: Devoted";
+            else if(count > 100) levelText.innerText = "Level: Steady";
+
+            if (count === goal && count !== 0) {
+                playTargetSound();
+                if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
+                mainDisplay.style.color = "var(--gold-glow)";
+            } else {
+                mainDisplay.style.color = "#fff";
+            }
+
+            localStorage.setItem('mag_count', count);
+        }
+
+        document.getElementById('tapBtn').addEventListener('click', () => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            count++;
+            updateUI();
+        });
+
+        function reset() { if(confirm("Reset Today's Count?")) { count = 0; updateUI(); } }
+        function setGoal() { 
+            let g = prompt("Set Target:", goal); 
+            if(g) { goal = parseInt(g); updateUI(); localStorage.setItem('mag_goal', goal); } 
+        }
+
+        soundBtn.innerText = isMuted ? '🔇 Muted' : '🔊 Sound On';
+        updateUI();
+    </script>
+</body>
+</html>
