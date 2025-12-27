@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Divine Beads - M.A. Gohar</title>
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#030a16">
     <style>
         :root {
@@ -24,72 +23,86 @@
             user-select: none; overflow: hidden;
         }
 
+        @keyframes neonBorderGlow {
+            0% { border-color: #00d2ff; box-shadow: 0 0 20px #00d2ff, inset 0 0 10px #00d2ff; }
+            33% { border-color: #f3ba2f; box-shadow: 0 0 25px #f3ba2f, inset 0 0 10px #f3ba2f; }
+            66% { border-color: #ff00ff; box-shadow: 0 0 25px #ff00ff, inset 0 0 10px #ff00ff; }
+            100% { border-color: #00d2ff; box-shadow: 0 0 20px #00d2ff, inset 0 0 10px #00d2ff; }
+        }
+
+        @keyframes buttonPulse {
+            0% { border-color: rgba(0, 210, 255, 0.5); box-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
+            50% { border-color: var(--gold-glow); box-shadow: 0 0 15px var(--gold-glow); }
+            100% { border-color: rgba(0, 210, 255, 0.5); box-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
+        }
+
+        /* AUTO-FIT PHONE FRAME */
         .phone-frame {
             background: var(--card-bg);
-            width: 340px; padding: 25px 15px 45px;
-            border-radius: 50px; text-align: center;
-            position: relative; border: 3px solid #1e293b; 
-            box-shadow: 0 0 40px rgba(0, 210, 255, 0.15), inset 0 0 20px rgba(0,0,0,0.5);
+            width: 90vw; 
+            max-width: 340px;
+            height: 92vh;
+            max-height: 700px;
+            padding: 20px 15px;
+            border-radius: 40px; 
+            text-align: center;
+            position: relative; 
+            border: 6px solid #1e293b; 
+            animation: neonBorderGlow 5s linear infinite;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around; /* Elements ke beech gap auto-adjust hoga */
+            box-sizing: border-box;
         }
 
-        .top-container { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; margin-bottom: 20px; }
-        
+        /* TOP BUTTONS RESPONSIVE */
+        .top-container { display: flex; justify-content: space-between; align-items: center; padding: 0 5px; }
         .side-btn { 
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: white; padding: 8px 12px; border-radius: 12px; font-size: 0.7rem; cursor: pointer;
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 8px 12px; border-radius: 12px; font-size: 0.65rem; cursor: pointer;
+            animation: buttonPulse 3s infinite ease-in-out;
         }
 
-        .branding-header { margin-bottom: 15px; }
-        .app-title { font-size: 1.3rem; color: #fff; font-weight: 900; letter-spacing: 2px; }
-        .urdu-title { font-size: 1.4rem; color: var(--gold-glow); display: block; margin: 5px 0; }
-        .dev-name { font-size: 0.8rem; color: #fff; opacity: 0.7; letter-spacing: 1px; }
-
-        .level-badge { color: var(--gold-glow); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
-
-        .header-stats { display: flex; justify-content: space-between; padding: 0 20px; font-size: 0.9rem; color: var(--text-gray); }
         
-        .stat-col { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-        .stat-col-right { align-items: flex-end; text-align: right; }
+        .volume-control input { width: 80px; accent-color: var(--gold-glow); }
 
-        .mute-btn { cursor: pointer; color: var(--gold-glow); font-size: 0.75rem; background: rgba(243, 186, 47, 0.1); padding: 2px 8px; border-radius: 4px; border: 0.5px solid var(--gold-glow); }
+        .header-stats { display: flex; justify-content: space-between; padding: 0 10px; font-size: 0.85rem; color: var(--text-gray); }
         
-        .share-btn {
-            cursor: pointer; font-size: 0.75rem; 
-            color: var(--neon-border); border: 1px solid var(--neon-border); 
-            padding: 2px 8px; border-radius: 4px; background: rgba(0, 210, 255, 0.1);
-            transition: 0.3s;
-        }
-        .share-btn:active { background: var(--neon-border); color: #000; }
-
+        /* RING SIZE AUTO-ADJUST */
         .ring-container {
-            position: relative; width: 220px; height: 220px; margin: 15px auto 30px;
+            position: relative; 
+            width: 180px; 
+            height: 180px; 
+            margin: 5px auto;
             display: flex; justify-content: center; align-items: center;
         }
 
-        .mala-beads-wrap {
-            position: absolute; width: 100%; height: 100%;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
         .bead {
-            position: absolute; width: 14px; height: 14px;
+            position: absolute; width: 10px; height: 10px;
             background: radial-gradient(circle at 30% 30%, #fff, var(--bead-color));
-            border-radius: 50%; box-shadow: 0 0 5px rgba(255, 215, 0, 0.6);
-            left: 50%; top: 0; transform-origin: 50% 110px;
+            border-radius: 50%; left: 50%; top: 0; transform-origin: 50% 90px;
         }
 
-        .total-display { font-size: 4.5rem; font-weight: 100; margin: 0; z-index: 10; color: #fff; }
-        .percent-display { position: absolute; bottom: 35px; font-size: 1rem; color: var(--gold-glow); font-weight: bold; }
+        .total-display { font-size: 3.5rem; font-weight: 100; margin: 0; z-index: 10; color: #fff; }
 
+        /* MAIN BUTTON RESPONSIVE */
         .dhikr-btn {
-            width: 140px; height: 140px; border-radius: 50%; border: none;
+            width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.1);
             background: radial-gradient(circle at 35% 35%, #fcd34d 0%, #b28924 100%);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.8);
-            cursor: pointer; display: flex; justify-content: center; align-items: center;
-            margin: 0 auto; outline: none; transition: 0.1s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            cursor: pointer; display: flex; justify-content: center; align-items: center; 
+            margin: 5px auto; outline: none; flex-shrink: 0;
         }
-        .dhikr-btn:active { transform: scale(0.9); }
-        .dhikr-btn span { font-size: 1.2rem; color: #4a3700; font-weight: 900; letter-spacing: 2px; }
+
+        /* Responsive Fix for Small Screens */
+        @media (max-height: 600px) {
+            .app-title { font-size: 0.9rem; }
+            .ring-container { width: 150px; height: 150px; }
+            .bead { transform-origin: 50% 75px; }
+            .dhikr-btn { width: 100px; height: 100px; }
+            .total-display { font-size: 2.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -101,106 +114,79 @@
         </div>
 
         <div class="branding-header">
-            <span class="app-title">DIVINE BEADS</span>
-            <span class="urdu-title">پاک تسبیح</span>
-            <span class="dev-name">Powered by M.A. Gohar</span>
+            <Font SIZE="5">DIVINE BEADS</font>
+          <p>  <font size="5">پاک تسبیح</font></p>
+          <p> <b><font size="4">Powered By M.A.Gohar</b>
         </div>
-        <p><marquee>Is App ko share karke Sadaqah-e-Jariyah ka sawab kamayein. Aapka ek share kisi ke dhikr aur barkat ka zariya ban sakta hai!
-        Earn the reward of Sadaqah-e-Jariyah. Your one share can become a source of Dhikr and blessings for someone! its 100% secure we don't access your Phone storage and no need to give its any permission </marquee></p>
-<p><marquee>Contact Us On Instagram (goha.r7776) for more free Android app Such as Kitchen Recipe & Zakat Calculater etc we build Ads free App <p/></marquee>
-        <span class="level-badge" id="levelText">Level: Beginner</span>
+
+        <marquee>Sadaqah-e-Jariyah: Share App And earn the Reward till the time of Qayamah; this is 100% secure App No Adult Ads | 100% Family & Child Safe ! you don't need to give its any phone's Permission |follow us on Instagram: (goha.r7776) or Email us dialanddeal78@gmail.com for more info</marquee>
+
+        <div class="volume-control">
+            <span style="font-size: 0.6rem;">🔈</span>
+            <input type="range" id="volSlider" min="0" max="1" step="0.1" value="0.5">
+            <span style="font-size: 0.6rem;">🔊</span>
+        </div>
 
         <div class="header-stats">
-            <div class="stat-col">
+            <div class="stat-col" style="text-align: left;">
                 <span>Today: <b id="todayCount" style="color:#fff">0</b></span>
-                <div class="mute-btn" id="soundBtn" onclick="toggleSound()">🔊 Sound On</div>
+                <div class="side-btn" id="soundBtn" onclick="toggleSound()" style="padding: 3px 6px; margin-top: 5px;">🔊 On</div>
             </div>
-            
-            <div class="stat-col stat-col-right">
+            <div class="stat-col" style="text-align: right;">
                 <span>Target: <b id="targetLabel" style="color:#fff">100</b></span>
-                <div class="share-btn" onclick="shareApp()">🔗 Share Link</div>
+                <div class="side-btn" onclick="shareApp()" style="padding: 3px 6px; margin-top: 5px;">🔗 Share</div>
             </div>
         </div>
 
         <div class="ring-container">
-            <div class="mala-beads-wrap" id="malaWrap"></div>
+            <div class="mala-beads-wrap" id="malaWrap" style="position: absolute; width: 100%; height: 100%; transition: transform 0.3s;"></div>
             <h1 class="total-display" id="mainCounter">0</h1>
-            <div class="percent-display" id="percentText">0%</div>
         </div>
 
         <button class="dhikr-btn" id="tapBtn">
-            <span>PRESS</span>
+            <span style="font-size: 1rem; color: #4a3700; font-weight: 900;">PRESS</span>
         </button>
     </div>
-   
 
     <script>
         let count = parseInt(localStorage.getItem('mag_count')) || 0;
         let goal = parseInt(localStorage.getItem('mag_goal')) || 100;
         let isMuted = localStorage.getItem('mag_mute') === 'true';
+        let appVolume = parseFloat(localStorage.getItem('mag_vol')) || 0.5;
 
-        const malaWrap = document.getElementById('malaWrap');
         const mainDisplay = document.getElementById('mainCounter');
-        const percentText = document.getElementById('percentText');
-        const todayDisplay = document.getElementById('todayCount');
-        const targetLabel = document.getElementById('targetLabel');
-        const soundBtn = document.getElementById('soundBtn');
-        const levelText = document.getElementById('levelText');
-
-        for (let i = 0; i < 33; i++) {
-            const bead = document.createElement('div');
-            bead.className = 'bead';
-            bead.style.transform = `translateX(-50%) rotate(${i * (360 / 33)}deg)`;
-            malaWrap.appendChild(bead);
-        }
+        const volSlider = document.getElementById('volSlider');
+        volSlider.value = appVolume;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function toggleSound() {
-            isMuted = !isMuted;
-            localStorage.setItem('mag_mute', isMuted);
-            soundBtn.innerText = isMuted ? '🔇 Muted' : '🔊 Sound On';
-        }
-
-        function playTargetSound() {
+        
+        function playTargetAlert() {
             if (isMuted) return;
-            const freqs = [2500, 3000, 3500];
-            freqs.forEach((f, i) => {
+            const playSound = () => {
                 const osc = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                osc.connect(g); g.connect(audioCtx.destination);
-                osc.frequency.setValueAtTime(f, audioCtx.currentTime + (i * 0.2));
-                g.gain.setValueAtTime(0.1, audioCtx.currentTime + (i * 0.2));
-                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (i * 0.2) + 0.8);
-                osc.start(audioCtx.currentTime + (i * 0.2));
-                osc.stop(audioCtx.currentTime + (i * 0.2) + 0.8);
-            });
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+                gain.gain.setValueAtTime(appVolume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1);
+            };
+            playSound();
+            setTimeout(playSound, 1100);
+            if (navigator.vibrate) {
+                navigator.vibrate([400, 200, 400, 200, 400]); 
+            }
         }
 
         function updateUI() {
             mainDisplay.innerText = count;
-            todayDisplay.innerText = count;
-            targetLabel.innerText = goal;
-            
-            const rotation = count * (360 / 33);
-            malaWrap.style.transform = `rotate(-${rotation}deg)`;
-
-            let progress = Math.min((count / goal) * 100, 100);
-            percentText.innerText = Math.floor(progress) + "%";
-
-            const beads = document.querySelectorAll('.bead');
-            beads.forEach((b, idx) => {
-                if (count % 33 > idx) b.style.filter = "hue-rotate(150deg) brightness(1.5)";
-                else b.style.filter = "none";
-            });
-
-            if(count > 1000) levelText.innerText = "Level: Master";
-            else if(count > 500) levelText.innerText = "Level: Devoted";
-            else if(count > 100) levelText.innerText = "Level: Steady";
-
+            document.getElementById('todayCount').innerText = count;
+            document.getElementById('targetLabel').innerText = goal;
+            document.getElementById('malaWrap').style.transform = `rotate(-${count * (360/33)}deg)`;
             if (count === goal && count !== 0) {
-                playTargetSound();
-                if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
+                playTargetAlert();
                 mainDisplay.style.color = "var(--gold-glow)";
             } else {
                 mainDisplay.style.color = "#fff";
@@ -208,31 +194,42 @@
             localStorage.setItem('mag_count', count);
         }
 
+        volSlider.oninput = () => {
+            appVolume = volSlider.value;
+            localStorage.setItem('mag_vol', appVolume);
+        };
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            localStorage.setItem('mag_mute', isMuted);
+            document.getElementById('soundBtn').innerText = isMuted ? '🔇 Off' : '🔊 On';
+        }
+
         function shareApp() {
-            const currentURL = window.location.href;
-            const text = `Divine Beads (پاک تسبیح) App - Rozana dhikr ke liye behtareen app: ${currentURL}`;
+            const text = `Divine Beads App: ${window.location.href}\nSadaqah-e-Jariyah!`;
             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
         }
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
-        }
-
-        document.getElementById('tapBtn').addEventListener('click', () => {
+        document.getElementById('tapBtn').onclick = () => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            count++;
-            updateUI();
-        });
+            count++; updateUI();
+        };
 
-        function reset() { if(confirm("Reset Today's Count?")) { count = 0; updateUI(); } }
+        function reset() { if(confirm("Reset Count?")) { count = 0; updateUI(); } }
         function setGoal() { 
             let g = prompt("Set Target:", goal); 
             if(g) { goal = parseInt(g); updateUI(); localStorage.setItem('mag_goal', goal); } 
         }
 
-        soundBtn.innerText = isMuted ? '🔇 Muted' : '🔊 Sound On';
+        const malaWrap = document.getElementById('malaWrap');
+        for (let i = 0; i < 33; i++) {
+            const b = document.createElement('div');
+            b.className = 'bead';
+            b.style.transform = `translateX(-50%) rotate(${i * (360/33)}deg)`;
+            malaWrap.appendChild(b);
+        }
         updateUI();
     </script>
 </body>
-                </html>
-                
+</html>
+
