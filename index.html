@@ -9,7 +9,7 @@
         body { margin: 0; background: var(--app-bg); font-family: sans-serif; color: white; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         .phone-frame { width: 100%; max-width: 450px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid #1e293b; text-align: center; box-shadow: 0 0 20px rgba(0,210,255,0.2); }
         
-        /* Stats Bar - Fonts Bade kiye gaye hain */
+        /* Stats Bar - Big Fonts */
         .stats-bar { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 15px 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; border: 1px solid rgba(0,210,255,0.1); }
         .stats-bar small { display: block; font-size: 0.65rem; text-transform: uppercase; opacity: 0.8; margin-bottom: 4px; }
         .stat-val { display: block; font-size: 1.1rem; font-weight: bold; }
@@ -122,18 +122,24 @@
 
     window.logClick = () => { runTransaction(globalRef, c => (c || 0) + 1); };
     
+    // Improved Like Logic
     window.handleLike = () => {
         if(!localStorage.getItem('mag_liked')) {
-            runTransaction(likeRef, c => (c || 0) + 1);
-            localStorage.setItem('mag_liked', 'true');
-            checkLikeStatus();
+            runTransaction(likeRef, c => (c || 0) + 1)
+            .then(() => {
+                localStorage.setItem('mag_liked', 'true');
+                checkLikeStatus();
+            });
         }
     };
 
     function checkLikeStatus() {
         if(localStorage.getItem('mag_liked')) {
-            document.getElementById('likeBtn').disabled = true;
-            document.getElementById('likeBtn').innerText = "💚";
+            const lb = document.getElementById('likeBtn');
+            if(lb) {
+                lb.disabled = true;
+                lb.style.opacity = "0.6";
+            }
         }
     }
     checkLikeStatus();
