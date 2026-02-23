@@ -15,8 +15,8 @@
         .main-btn:active { transform: scale(0.9); }
         .btn-ui { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; cursor: pointer;}
         
-        /* Green Heart Filter */
-        .like-btn { border: none; background: none; font-size: 1.5rem; cursor: pointer; transition: 0.3s; padding: 0; filter: hue-rotate(240deg) saturate(5); }
+        /* Green Heart Logic */
+        .like-btn { border: none; background: none; font-size: 1.8rem; cursor: pointer; transition: 0.3s; padding: 0; filter: hue-rotate(100deg) brightness(1.5); }
         .like-btn:disabled { filter: grayscale(1); cursor: default; opacity: 0.5; }
         
         .vol-control { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
@@ -89,39 +89,39 @@
     const globalRef = ref(db, 'stats/global_recite_count');
     const likeRef = ref(db, 'stats/total_likes');
 
+    // Stats Listener
     onValue(installRef, s => document.getElementById('installCount').innerText = s.val() || 0);
-    onValue(onlineCount, s => document.getElementById('onlineCount').innerText = s.val() || 0);
+    onValue(onlineRef, s => document.getElementById('onlineCount').innerText = s.val() || 0);
     onValue(globalRef, s => document.getElementById('globalCount').innerText = s.val() || 0);
     onValue(likeRef, s => document.getElementById('likeCount').innerText = s.val() || 0);
 
+    // Install Count
     if(!localStorage.getItem('mag_user_id')){
         runTransaction(installRef, c => (c || 0) + 1);
         localStorage.setItem('mag_user_id', 'v1_' + Date.now());
     }
 
+    // Online Count Logic
     if(!sessionStorage.getItem('is_counted')){
         runTransaction(onlineRef, c => (c || 0) + 1);
         sessionStorage.setItem('is_counted', 'true');
         onDisconnect(onlineRef).runTransaction(c => (c > 0 ? c - 1 : 0));
     }
 
-    // Now global increment only happens on Target Completion
     window.logGlobalRecite = () => { runTransaction(globalRef, c => (c || 0) + 1); };
     
+    // LIKE FUNCTION
     window.handleLike = () => {
         if(!localStorage.getItem('mag_liked')) {
             runTransaction(likeRef, c => (c || 0) + 1);
             localStorage.setItem('mag_liked', 'true');
-            checkLikeStatus();
+            document.getElementById('likeBtn').disabled = true;
         }
     };
 
-    function checkLikeStatus() {
-        if(localStorage.getItem('mag_liked')) {
-            document.getElementById('likeBtn').disabled = true;
-        }
+    if(localStorage.getItem('mag_liked')) {
+        document.getElementById('likeBtn').disabled = true;
     }
-    checkLikeStatus();
 </script>
 
 <script>
@@ -155,7 +155,6 @@
         if(count == target && target > 0) {
             playBeep(0); playBeep(500); playBeep(1000); 
             if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-            // Global count only increases when target is hit
             if(window.logGlobalRecite) window.logGlobalRecite();
         }
         localStorage.setItem('mag_cnt', count);
