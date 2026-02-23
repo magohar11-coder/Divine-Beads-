@@ -15,12 +15,21 @@
         .main-btn:active { transform: scale(0.9); }
         .btn-ui { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; cursor: pointer;}
         
-        /* Green Heart Logic */
-        .like-btn { border: none; background: none; font-size: 1.8rem; cursor: pointer; transition: 0.3s; padding: 0; filter: hue-rotate(100deg) brightness(1.5); }
-        .like-btn:disabled { filter: grayscale(1); cursor: default; opacity: 0.5; }
-        
+        /* New Styles for Volume & Like */
         .vol-control { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
         input[type=range] { width: 80px; accent-color: var(--gold); }
+        
+        /* Green Heart Filter */
+        .like-btn { 
+            border: none; 
+            background: none; 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            padding: 0;
+            filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
+        }
+        .like-btn:disabled { filter: grayscale(1); cursor: default; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -43,9 +52,9 @@
 
     <div class="stats-bar">
         <div><small style="font-size:0.5rem;">Installs</small><span class="stat-val" id="installCount">0</span></div>
-        <div><small style="font-size:0.5rem;">Online Now</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
-        <div><small style="font-size:0.5rem;">Live Recite</small><span class="stat-val" id="globalCount" style="color:var(--gold);">0</span></div>
-        <div><small style="font-size:0.5rem;">Likes</small><span class="stat-val" id="likeCount" style="color:#00ff88;">0</span></div>
+        <div><small style="font-size:0.5rem;">Online</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
+        <div><small style="font-size:0.5rem;">Recite</small><span class="stat-val" id="globalCount" style="color:var(--gold);">0</span></div>
+        <div><small style="font-size:0.5rem;">Likes</small><span class="stat-val" id="likeCount" style="color:#ff4b2b;">0</span></div>
     </div>
 
     <div class="vol-control">
@@ -89,49 +98,53 @@
     const globalRef = ref(db, 'stats/global_recite_count');
     const likeRef = ref(db, 'stats/total_likes');
 
-    // Stats Listener
     onValue(installRef, s => document.getElementById('installCount').innerText = s.val() || 0);
     onValue(onlineRef, s => document.getElementById('onlineCount').innerText = s.val() || 0);
     onValue(globalRef, s => document.getElementById('globalCount').innerText = s.val() || 0);
     onValue(likeRef, s => document.getElementById('likeCount').innerText = s.val() || 0);
 
-    // Install Count
     if(!localStorage.getItem('mag_user_id')){
         runTransaction(installRef, c => (c || 0) + 1);
         localStorage.setItem('mag_user_id', 'v1_' + Date.now());
     }
 
-    // Online Count Logic
     if(!sessionStorage.getItem('is_counted')){
         runTransaction(onlineRef, c => (c || 0) + 1);
         sessionStorage.setItem('is_counted', 'true');
         onDisconnect(onlineRef).runTransaction(c => (c > 0 ? c - 1 : 0));
     }
 
-    window.logGlobalRecite = () => { runTransaction(globalRef, c => (c || 0) + 1); };
+    window.logClick = () => { runTransaction(globalRef, c => (c || 0) + 1); };
     
-    // LIKE FUNCTION
+    // Like logic
     window.handleLike = () => {
         if(!localStorage.getItem('mag_liked')) {
             runTransaction(likeRef, c => (c || 0) + 1);
             localStorage.setItem('mag_liked', 'true');
-            document.getElementById('likeBtn').disabled = true;
+            checkLikeStatus();
         }
     };
 
-    if(localStorage.getItem('mag_liked')) {
-        document.getElementById('likeBtn').disabled = true;
+    function checkLikeStatus() {
+        if(localStorage.getItem('mag_liked')) {
+            document.getElementById('likeBtn').disabled = true;
+            document.getElementById('likeBtn').innerText = "❤️";
+        }
     }
+    checkLikeStatus();
 </script>
 
 <script>
     let count = parseInt(localStorage.getItem('mag_cnt')) || 0;
     let target = parseInt(localStorage.getItem('mag_trg')) || 100;
     let muted = false;
-    let volumeLevel = 0.5;
+    let volumeLevel = 0.5; // Default volume
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    document.getElementById('volSlider').oninput = (e) => { volumeLevel = e.target.value; };
+    // Volume Slider Event
+    document.getElementById('volSlider').oninput = (e) => {
+        volumeLevel = e.target.value;
+    };
 
     function playBeep(delay) {
         if(muted || volumeLevel <= 0) return;
@@ -140,7 +153,7 @@
             const g = audioCtx.createGain();
             osc.connect(g); g.connect(audioCtx.destination);
             osc.frequency.value = 880;
-            g.gain.setValueAtTime(volumeLevel * 0.2, audioCtx.currentTime);
+            g.gain.setValueAtTime(volumeLevel * 0.2, audioCtx.currentTime); // Scaled volume
             g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
             osc.start(); osc.stop(audioCtx.currentTime + 0.4);
         }, delay);
@@ -155,7 +168,6 @@
         if(count == target && target > 0) {
             playBeep(0); playBeep(500); playBeep(1000); 
             if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-            if(window.logGlobalRecite) window.logGlobalRecite();
         }
         localStorage.setItem('mag_cnt', count);
     }
@@ -163,6 +175,7 @@
     document.getElementById('pressBtn').onclick = () => {
         if(audioCtx.state === 'suspended') audioCtx.resume();
         count++; update();
+        if(window.logClick) window.logClick();
     };
 
     function reset() { if(confirm("Reset Count?")) { count = 0; update(); } }
