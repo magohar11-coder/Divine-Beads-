@@ -15,21 +15,24 @@
         .main-btn:active { transform: scale(0.9); }
         .btn-ui { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; cursor: pointer;}
         
-        /* New Styles for Volume & Like */
         .vol-control { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
         input[type=range] { width: 80px; accent-color: var(--gold); }
-        
-        /* Green Heart Filter */
+
+        /* Sahi Green Heart Style */
         .like-btn { 
             border: none; 
             background: none; 
-            font-size: 1.5rem; 
+            font-size: 1.8rem; 
             cursor: pointer; 
             transition: 0.3s; 
             padding: 0;
-            filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
+            display: inline-block;
         }
-        .like-btn:disabled { filter: grayscale(1); cursor: default; opacity: 0.5; }
+        .like-btn:disabled { 
+            opacity: 0.6; 
+            cursor: default; 
+            filter: drop-shadow(0 0 5px #22c55e); /* Green glow effect */
+        }
     </style>
 </head>
 <body>
@@ -46,7 +49,7 @@
         <p style="color: var(--gold); font-size: 0.75rem; margin:0;">Powered By M.A. Gohar</p>
         
         <div style="margin-top: 10px;">
-            <button id="likeBtn" class="like-btn" onclick="handleLike()">❤️</button>
+            <button id="likeBtn" class="like-btn" onclick="handleLike()">💚</button>
         </div>
     </div>
 
@@ -54,7 +57,7 @@
         <div><small style="font-size:0.5rem;">Installs</small><span class="stat-val" id="installCount">0</span></div>
         <div><small style="font-size:0.5rem;">Online</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
         <div><small style="font-size:0.5rem;">Recite</small><span class="stat-val" id="globalCount" style="color:var(--gold);">0</span></div>
-        <div><small style="font-size:0.5rem;">Likes</small><span class="stat-val" id="likeCount" style="color:#ff4b2b;">0</span></div>
+        <div><small style="font-size:0.5rem;">Likes</small><span class="stat-val" id="likeCount" style="color:#22c55e;">0</span></div>
     </div>
 
     <div class="vol-control">
@@ -116,7 +119,6 @@
 
     window.logClick = () => { runTransaction(globalRef, c => (c || 0) + 1); };
     
-    // Like logic
     window.handleLike = () => {
         if(!localStorage.getItem('mag_liked')) {
             runTransaction(likeRef, c => (c || 0) + 1);
@@ -128,7 +130,7 @@
     function checkLikeStatus() {
         if(localStorage.getItem('mag_liked')) {
             document.getElementById('likeBtn').disabled = true;
-            document.getElementById('likeBtn').innerText = "❤️";
+            document.getElementById('likeBtn').innerText = "💚"; // Green heart fix
         }
     }
     checkLikeStatus();
@@ -138,13 +140,10 @@
     let count = parseInt(localStorage.getItem('mag_cnt')) || 0;
     let target = parseInt(localStorage.getItem('mag_trg')) || 100;
     let muted = false;
-    let volumeLevel = 0.5; // Default volume
+    let volumeLevel = 0.5;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Volume Slider Event
-    document.getElementById('volSlider').oninput = (e) => {
-        volumeLevel = e.target.value;
-    };
+    document.getElementById('volSlider').oninput = (e) => { volumeLevel = e.target.value; };
 
     function playBeep(delay) {
         if(muted || volumeLevel <= 0) return;
@@ -153,7 +152,7 @@
             const g = audioCtx.createGain();
             osc.connect(g); g.connect(audioCtx.destination);
             osc.frequency.value = 880;
-            g.gain.setValueAtTime(volumeLevel * 0.2, audioCtx.currentTime); // Scaled volume
+            g.gain.setValueAtTime(volumeLevel * 0.2, audioCtx.currentTime);
             g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
             osc.start(); osc.stop(audioCtx.currentTime + 0.4);
         }, delay);
