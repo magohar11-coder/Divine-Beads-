@@ -8,8 +8,12 @@
         :root { --app-bg: #030a16; --gold: #f3ba2f; --cyan: #00d2ff; }
         body { margin: 0; background: var(--app-bg); font-family: sans-serif; color: white; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         .phone-frame { width: 100%; max-width: 450px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid #1e293b; text-align: center; box-shadow: 0 0 20px rgba(0,210,255,0.2); }
-        .stats-bar { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; border: 1px solid rgba(0,210,255,0.1); }
-        .stat-val { display: block; font-size: 0.9rem; font-weight: bold; margin-top: 3px; }
+        
+        /* Stats Bar - Fonts Bade kiye gaye hain */
+        .stats-bar { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 15px 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; border: 1px solid rgba(0,210,255,0.1); }
+        .stats-bar small { display: block; font-size: 0.65rem; text-transform: uppercase; opacity: 0.8; margin-bottom: 4px; }
+        .stat-val { display: block; font-size: 1.1rem; font-weight: bold; }
+
         .bead { position: absolute; width: 10px; height: 10px; background: radial-gradient(circle, #fff, var(--gold)); border-radius: 50%; left: 50%; transform-origin: 50% 90px; }
         .main-btn { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fcd34d, #b28924); border: 6px solid rgba(255,255,255,0.1); cursor: pointer; margin: 0 auto; transition: 0.1s; }
         .main-btn:active { transform: scale(0.9); }
@@ -18,7 +22,6 @@
         .vol-control { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
         input[type=range] { width: 80px; accent-color: var(--gold); }
 
-        /* Sahi Green Heart Style */
         .like-btn { 
             border: none; 
             background: none; 
@@ -31,7 +34,7 @@
         .like-btn:disabled { 
             opacity: 0.6; 
             cursor: default; 
-            filter: drop-shadow(0 0 5px #22c55e); /* Green glow effect */
+            filter: drop-shadow(0 0 5px #22c55e);
         }
     </style>
 </head>
@@ -54,10 +57,10 @@
     </div>
 
     <div class="stats-bar">
-        <div><small style="font-size:0.5rem;">Installs</small><span class="stat-val" id="installCount">0</span></div>
-        <div><small style="font-size:0.5rem;">Online</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
-        <div><small style="font-size:0.5rem;">Recite</small><span class="stat-val" id="globalCount" style="color:var(--gold);">0</span></div>
-        <div><small style="font-size:0.5rem;">Likes</small><span class="stat-val" id="likeCount" style="color:#22c55e;">0</span></div>
+        <div><small>Installs</small><span class="stat-val" id="installCount">0</span></div>
+        <div><small>Online</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
+        <div><small>Recite</small><span class="stat-val" id="globalCount" style="color:var(--gold);">0</span></div>
+        <div><small>Likes</small><span class="stat-val" id="likeCount" style="color:#22c55e;">0</span></div>
     </div>
 
     <div class="vol-control">
@@ -130,7 +133,7 @@
     function checkLikeStatus() {
         if(localStorage.getItem('mag_liked')) {
             document.getElementById('likeBtn').disabled = true;
-            document.getElementById('likeBtn').innerText = "💚"; // Green heart fix
+            document.getElementById('likeBtn').innerText = "💚";
         }
     }
     checkLikeStatus();
