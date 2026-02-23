@@ -8,12 +8,18 @@
         :root { --app-bg: #030a16; --gold: #f3ba2f; --cyan: #00d2ff; }
         body { margin: 0; background: var(--app-bg); font-family: sans-serif; color: white; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         .phone-frame { width: 100%; max-width: 450px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid #1e293b; text-align: center; box-shadow: 0 0 20px rgba(0,210,255,0.2); }
-        .stats-bar { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; border: 1px solid rgba(0,210,255,0.1); }
-        .stat-val { display: block; font-size: 1rem; font-weight: bold; margin-top: 3px; }
+        .stats-bar { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; border: 1px solid rgba(0,210,255,0.1); }
+        .stat-val { display: block; font-size: 0.9rem; font-weight: bold; margin-top: 3px; }
         .bead { position: absolute; width: 10px; height: 10px; background: radial-gradient(circle, #fff, var(--gold)); border-radius: 50%; left: 50%; transform-origin: 50% 90px; }
         .main-btn { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fcd34d, #b28924); border: 6px solid rgba(255,255,255,0.1); cursor: pointer; margin: 0 auto; transition: 0.1s; }
         .main-btn:active { transform: scale(0.9); }
-        .btn-ui { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; }
+        .btn-ui { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; cursor: pointer;}
+        
+        /* New Styles for Volume & Like */
+        .vol-control { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        input[type=range] { width: 80px; accent-color: var(--gold); }
+        .like-btn { border: none; background: none; font-size: 1.5rem; cursor: pointer; transition: 0.3s; padding: 0;}
+        .like-btn:disabled { filter: grayscale(1); cursor: default; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -28,12 +34,23 @@
         <h1 style="margin:0; font-size: 1.5rem;">DIVINE BEADS 5</h1>
         <h2 style="margin:2px 0;">پاک تسبیح</h2>
         <p style="color: var(--gold); font-size: 0.75rem; margin:0;">Powered By M.A. Gohar</p>
+        
+        <div style="margin-top: 10px;">
+            <button id="likeBtn" class="like-btn" onclick="handleLike()">❤️</button>
+        </div>
     </div>
 
     <div class="stats-bar">
-        <div><small style="font-size:0.6rem;">Installs</small><span class="stat-val" id="installCount">0</span></div>
-        <div><small style="font-size:0.6rem;">Online</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
-        <div><small style="font-size:0.6rem;">Live Recite</small><span class="stat-val" id="globalCount" style="color:var(--gold);">0</span></div>
+        <div><small style="font-size:0.5rem;">Installs</small><span class="stat-val" id="installCount">0</span></div>
+        <div><small style="font-size:0.5rem;">Online</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
+        <div><small style="font-size:0.5rem;">Recite</small><span class="stat-val" id="globalCount" style="color:var(--gold);">0</span></div>
+        <div><small style="font-size:0.5rem;">Likes</small><span class="stat-val" id="likeCount" style="color:#ff4b2b;">0</span></div>
+    </div>
+
+    <div class="vol-control">
+        <small>🔈</small>
+        <input type="range" id="volSlider" min="0" max="1" step="0.1" value="0.5">
+        <small>🔊</small>
     </div>
 
     <div style="display: flex; justify-content: space-between; padding: 0 10px; font-size: 0.8rem;">
@@ -69,18 +86,18 @@
     const installRef = ref(db, 'stats/total_installs');
     const onlineRef = ref(db, 'stats/online_now');
     const globalRef = ref(db, 'stats/global_recite_count');
+    const likeRef = ref(db, 'stats/total_likes');
 
     onValue(installRef, s => document.getElementById('installCount').innerText = s.val() || 0);
     onValue(onlineRef, s => document.getElementById('onlineCount').innerText = s.val() || 0);
     onValue(globalRef, s => document.getElementById('globalCount').innerText = s.val() || 0);
+    onValue(likeRef, s => document.getElementById('likeCount').innerText = s.val() || 0);
 
-    // One-time install count logic
     if(!localStorage.getItem('mag_user_id')){
         runTransaction(installRef, c => (c || 0) + 1);
         localStorage.setItem('mag_user_id', 'v1_' + Date.now());
     }
 
-    // Fixed Online Tracking (Prevents duplicate counting on refresh)
     if(!sessionStorage.getItem('is_counted')){
         runTransaction(onlineRef, c => (c || 0) + 1);
         sessionStorage.setItem('is_counted', 'true');
@@ -88,22 +105,45 @@
     }
 
     window.logClick = () => { runTransaction(globalRef, c => (c || 0) + 1); };
+    
+    // Like logic
+    window.handleLike = () => {
+        if(!localStorage.getItem('mag_liked')) {
+            runTransaction(likeRef, c => (c || 0) + 1);
+            localStorage.setItem('mag_liked', 'true');
+            checkLikeStatus();
+        }
+    };
+
+    function checkLikeStatus() {
+        if(localStorage.getItem('mag_liked')) {
+            document.getElementById('likeBtn').disabled = true;
+            document.getElementById('likeBtn').innerText = "❤️";
+        }
+    }
+    checkLikeStatus();
 </script>
 
 <script>
     let count = parseInt(localStorage.getItem('mag_cnt')) || 0;
     let target = parseInt(localStorage.getItem('mag_trg')) || 100;
     let muted = false;
+    let volumeLevel = 0.5; // Default volume
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+    // Volume Slider Event
+    document.getElementById('volSlider').oninput = (e) => {
+        volumeLevel = e.target.value;
+    };
+
     function playBeep(delay) {
-        if(muted) return;
+        if(muted || volumeLevel <= 0) return;
         setTimeout(() => {
             const osc = audioCtx.createOscillator();
             const g = audioCtx.createGain();
             osc.connect(g); g.connect(audioCtx.destination);
             osc.frequency.value = 880;
-            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            g.gain.setValueAtTime(volumeLevel * 0.2, audioCtx.currentTime); // Scaled volume
             g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
             osc.start(); osc.stop(audioCtx.currentTime + 0.4);
         }, delay);
@@ -116,7 +156,7 @@
         document.getElementById('mala').style.transform = `rotate(-${count * 10.9}deg)`;
         
         if(count == target && target > 0) {
-            playBeep(0); playBeep(500); playBeep(1000); // 3 Times
+            playBeep(0); playBeep(500); playBeep(1000); 
             if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
         }
         localStorage.setItem('mag_cnt', count);
