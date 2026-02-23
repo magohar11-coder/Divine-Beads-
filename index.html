@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Divine Beads - M.A. Gohar</title>
+    <title>Smart Tasbih - M.A. Gohar</title>
     <style>
         :root { --app-bg: #030a16; --gold: #f3ba2f; --cyan: #00d2ff; }
         body { margin: 0; background: var(--app-bg); font-family: sans-serif; color: white; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
@@ -15,9 +15,9 @@
         .stat-val { display: block; font-size: 1.1rem; font-weight: bold; }
 
         .bead { position: absolute; width: 10px; height: 10px; background: radial-gradient(circle, #fff, var(--gold)); border-radius: 50%; left: 50%; transform-origin: 50% 90px; }
-        .main-btn { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fcd34d, #b28924); border: 6px solid rgba(255,255,255,0.1); cursor: pointer; margin: 0 auto; transition: 0.1s; }
+        .main-btn { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fcd34d, #b28924); border: 6px solid rgba(255,255,255,0.1); cursor: pointer; margin: 0 auto; transition: 0.1s; -webkit-tap-highlight-color: transparent; }
         .main-btn:active { transform: scale(0.9); }
-        .btn-ui { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; cursor: pointer;}
+        .btn-ui { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; cursor: pointer; -webkit-tap-highlight-color: transparent;}
         
         .vol-control { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
         input[type=range] { width: 80px; accent-color: var(--gold); }
@@ -25,14 +25,15 @@
         .like-btn { 
             border: none; 
             background: none; 
-            font-size: 1.8rem; 
+            font-size: 2rem; 
             cursor: pointer; 
             transition: 0.3s; 
-            padding: 0;
+            padding: 10px; /* Touch area bada kiya mobile ke liye */
             display: inline-block;
+            -webkit-tap-highlight-color: transparent;
         }
         .like-btn:disabled { 
-            opacity: 0.6; 
+            opacity: 0.5; 
             cursor: default; 
             filter: drop-shadow(0 0 5px #22c55e);
         }
@@ -48,17 +49,17 @@
 
     <div>
         <h1 style="margin:0; font-size: 1.5rem;">Smart Tasbih</h1>
-        <h2 style="margin:2px 0;">Remember me in your prayers</h2>
+        <h2 style="margin:2px 0; font-weight: normal; font-size: 1rem;">Remember me in your prayers</h2>
         <p style="color: var(--gold); font-size: 0.75rem; margin:0;">Powered By M.A. Gohar</p>
         
-        <div style="margin-top: 10px;">
+        <div style="margin-top: 5px;">
             <button id="likeBtn" class="like-btn" onclick="handleLike()">💚</button>
         </div>
     </div>
 
     <div class="stats-bar">
-        <div><small>Online Now </small><span class="stat-val" id="installCount">0</span></div>
-        <div><small>Install</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
+        <div><small>Install</small><span class="stat-val" id="installCount">0</span></div>
+        <div><small>Online Now</small><span class="stat-val" id="onlineCount" style="color:var(--cyan);">0</span></div>
         <div><small>Recite</small><span class="stat-val" id="globalCount" style="color:var(--gold);">0</span></div>
         <div><small>Likes</small><span class="stat-val" id="likeCount" style="color:#22c55e;">0</span></div>
     </div>
@@ -122,13 +123,16 @@
 
     window.logClick = () => { runTransaction(globalRef, c => (c || 0) + 1); };
     
-    // Improved Like Logic
-    window.handleLike = () => {
+    // Mobile Touch Fix: handleLike function updated
+    window.handleLike = function() {
         if(!localStorage.getItem('mag_liked')) {
-            runTransaction(likeRef, c => (c || 0) + 1)
-            .then(() => {
+            runTransaction(likeRef, (currentLikes) => {
+                return (currentLikes || 0) + 1;
+            }).then(() => {
                 localStorage.setItem('mag_liked', 'true');
                 checkLikeStatus();
+            }).catch((err) => {
+                console.error("Like failed:", err);
             });
         }
     };
@@ -138,7 +142,7 @@
             const lb = document.getElementById('likeBtn');
             if(lb) {
                 lb.disabled = true;
-                lb.style.opacity = "0.6";
+                lb.style.opacity = "0.4";
             }
         }
     }
